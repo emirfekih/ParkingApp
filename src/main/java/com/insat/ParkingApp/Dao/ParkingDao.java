@@ -11,5 +11,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Repository
 public interface ParkingDao extends CrudRepository <Parking,Long> {
-
+    public Parking findOneByNom(String name);
 }

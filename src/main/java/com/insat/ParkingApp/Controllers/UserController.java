@@ -31,7 +31,7 @@ public class UserController {
    * @param nom User's name
    * @return A string describing if the user is succesfully created or not.
    */
-  @RequestMapping(value="/createUser", method = RequestMethod.GET,headers="Accept=application/json")
+  @RequestMapping(value="/createUser", method = RequestMethod.POST,headers="Accept=application/json")
   @ResponseBody
   public String create(String nom,String prenom,String email, Byte isResponsible,String hashedMdp) {
     User user = null;
@@ -44,13 +44,36 @@ public class UserController {
 
       userDao.save(user);
 
+
     }
     catch (Exception ex) {
       return "Error creating the user: " + ex.toString();
     }
-    return "Successfull registration , Welcome " + user.getPrenom() + " " + user.getNom();
+    return "1";
   }
-  
+
+  @RequestMapping(value="/connexion", method = RequestMethod.GET,headers="Accept=application/json")
+  @ResponseBody
+  public User connexion (String email,String mdp) {
+
+
+    User user = userDao.findByEmail(email);
+
+      String sha256hex = Hashing.sha256()
+              .hashString(mdp, StandardCharsets.UTF_8)
+              .toString();
+    if  ( user.getHashedMdp().equals(sha256hex)) {return user;}
+
+    else
+      {return null;}
+
+
+
+
+
+    }
+
+
   /**
    * /delete  --> Delete the user having the passed id.
    * 
@@ -138,14 +161,18 @@ public class UserController {
    * @param nom The new nom.
    * @return A string describing if the user is succesfully updated or not.
    */
-  @RequestMapping("/updateUser")
+  @RequestMapping(value="/updateUser",method = RequestMethod.GET,headers="Accept=application/json")
   @ResponseBody
-  public String updateUser(long id, String email, String nom,String prenom) {
+  public String updateUser(long id, String email, String nom,String prenom,String hashedMdp) {
     try {
       User user = userDao.findOne(id);
+      String sha256hex = Hashing.sha256()
+              .hashString(hashedMdp, StandardCharsets.UTF_8)
+              .toString();
       user.setEmail(email);
       user.setNom(nom);
       user.setPrenom(prenom);
+      user.setHashedMdp(sha256hex);
       userDao.save(user);
 
     }
