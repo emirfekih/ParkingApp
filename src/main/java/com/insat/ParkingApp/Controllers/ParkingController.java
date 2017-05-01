@@ -5,18 +5,25 @@ import com.google.maps.DirectionsApi;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
+import com.google.maps.errors.ApiException;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.TravelMode;
 import com.insat.ParkingApp.Dao.ParkingDao;
 import com.insat.ParkingApp.Models.Parking;
+import com.insat.ParkingApp.Models.ReponseParking;
 import com.insat.ParkingApp.Models.User;
+import org.hibernate.mapping.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by ASUS on 04/04/2017.
@@ -35,20 +42,35 @@ public class ParkingController {
            parkingDao.save(park);
         }
         catch (Exception ex) {
-            return "Error creating the user: " + ex.toString();
+            return "Error creating the Parking: " + ex.toString();
         }
         return "Parking succesfully added! (nom= " + park.getNom() + ")";
     }
 
+
     @RequestMapping(value="/findParking", method = RequestMethod.GET,headers="Accept=application/json")
     @ResponseBody
-    public String findParkingDistance() {
-DistanceMatrix trix = null;
+    public List<ReponseParking> findParkingDistance2(String name) {
+        DistanceMatrix trix = null;
+
+        List<ReponseParking> reponseParkings = new ArrayList<ReponseParking>();
         try {
+
             GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyA6rvM51qb0mlNn9P7CrhzuYTuu73n1Hvw");
-            DistanceMatrixApiRequest req = DistanceMatrixApi.newRequest(context);
-           trix = req.origins("Vancouver BC","Seattle")
-                    .destinations("San Francisco","Victoria BC")
+
+
+
+            Iterable<Parking> parkings = parkingDao.findAll();
+
+
+
+
+            //parking = parkingDao.findOne((long)2);
+            for (Parking parking : parkings
+             ) {
+                DistanceMatrixApiRequest req = DistanceMatrixApi.newRequest(context);
+            trix = req.origins(name)
+                    .destinations(parking.getNom())
                     .mode(TravelMode.DRIVING)
                     .avoid(DirectionsApi.RouteRestriction.HIGHWAYS)
                     .language("fr-FR")
@@ -56,20 +78,25 @@ DistanceMatrix trix = null;
 
 
 
+            //reponseParking=new ReponseParking(parking.getIdParking(),parking.getNom(),parking.getHoraire(),trix.rows[0].elements[0].distance.toString(),trix.rows[0].elements[0].duration.toString(),parking.getMoyenne(),parking.getHoraire());
 
-
+            reponseParkings.add(new ReponseParking(parking.getIdParking(),parking.getNom(),parking.getHoraire(),trix.rows[0].elements[0].distance.toString(),trix.rows[0].elements[0].duration.toString(),parking.getMoyenne(),parking.getPlaceDisponibles())) ;
 
 
 
         }
-        catch (Exception ex) {
-            return "Error Finding the Parking: " + ex.toString();
+
+    } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ApiException e) {
+            e.printStackTrace();
         }
-        return trix.rows[0].elements[0].distance.toString();
-    }
+        return reponseParkings;}
 
 
-    @RequestMapping(value="/getParkings", method = RequestMethod.GET,headers="Accept=application/json")
+        @RequestMapping(value="/getParkings", method = RequestMethod.GET,headers="Accept=application/json")
     @ResponseBody
     public Iterable<Parking> fetchall() {
 
