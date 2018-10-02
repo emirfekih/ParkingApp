@@ -1,7 +1,6 @@
-## Using MySQL in Spring Boot via Spring Data JPA and Hibernate
+## Spring Boot App to find Parkings in Tunis.
 
-See here for more informations:
-http://blog.netgloo.com/2014/10/27/using-mysql-in-spring-boot-via-spring-data-jpa-and-hibernate/
+### Using Spring Web, Spring Data JPA, Hibernate with a MySQL Database to create Restful Web Services.
 
 ### Build and run
 
@@ -20,7 +19,7 @@ Go on the project's root folder, then type:
 
     $ mvn spring-boot:run
 
-#### From Eclipse (Spring Tool Suite)
+#### From an IDE
 
 Import as *Existing Maven Project* and run it as *Spring Boot App*.
 
@@ -28,8 +27,8 @@ Import as *Existing Maven Project* and run it as *Spring Boot App*.
 ### Usage
 
 - Run the application and go on http://localhost:8080/
-- Use the following urls to invoke controllers methods and see the interactions
-  with the database:
+- Use the following urls to invoke controllers methods and see the interactions with the database
+  For example , to invoke user controller :
     * `/create?email=[email]&name=[name]`: create a new user with an auto-generated id and email and name as passed values.
     * `/delete?id=[id]`: delete the user with the passed id.
     * `/get-by-email?email=[email]`: retrieve the id for the user with the passed email address.
